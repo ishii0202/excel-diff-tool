@@ -1,0 +1,41 @@
+# Python environments and generated files
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# Local backups, previews and scratch work
+.local-backup/
+.local-artifacts/
+outputs/
+
+# Only the two synthetic sample workbooks belong in Git
+*.[xX][lL][sS][xX]
+*.[xX][lL][sS]
+*.[xX][lL][sS][mM]
+*.[xX][lL][sS][bB]
+!examples/old.xlsx
+!examples/new.xlsx
+~$*
+
+# Default redirected comparison output
+/diff.txt
