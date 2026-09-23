@@ -20,7 +20,16 @@
 
 Python 3.10以上を使用します。Microsoft Excelのインストールは不要です。
 
-プロジェクトのフォルダで仮想環境を作成し、依存ライブラリをインストールしてください。
+別のPCでは、まずPython 3.10以上をインストールし、GitHubからファイルを取得します。Gitを使う場合は次を実行してください。
+
+```bash
+git clone https://github.com/ishii0202/excel-diff-tool.git
+cd excel-diff-tool
+```
+
+Gitを使わない場合は、[GitHubのページ](https://github.com/ishii0202/excel-diff-tool)の「Code」→「Download ZIP」で取得し、展開したフォルダで以降のコマンドを実行できます。以下はプロジェクトのフォルダ内で実行してください。
+
+仮想環境を作成し、依存ライブラリをインストールします。
 
 ### macOS / Linux / WSL
 
@@ -38,6 +47,26 @@ py -m venv .venv
 ```
 
 以降の `python` は、PowerShellでは `.\.venv\Scripts\python.exe` に置き換えて実行できます。仮想環境を有効化するスクリプトの実行許可変更は不要です。
+
+セットアップ後、同梱サンプルを動かすには次を実行します。
+
+```bash
+# macOS / Linux / WSL（仮想環境を有効化したターミナル）
+python excel_diff.py
+```
+
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\python.exe excel_diff.py
+```
+
+手元のファイルを比較するときは、変更前と変更後の `.xlsx` をこの順序で指定します。例えばWindows PowerShellでは次のように実行します。
+
+```powershell
+.\.venv\Scripts\python.exe excel_diff.py "C:\Users\ユーザー名\Documents\変更前.xlsx" "C:\Users\ユーザー名\Documents\変更後.xlsx"
+```
+
+結果は画面に表示され、Excelレポートもプロジェクト内の `reports/` に保存されます。実際の保存先は実行後に画面へ表示します。
 
 ## 使い方
 
