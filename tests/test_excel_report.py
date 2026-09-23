@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import openpyxl
 
-import excel_report
+import excel_diff
 
 
 class ExcelReportTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class ExcelReportTests(unittest.TestCase):
         self.new.write_bytes(b"original new file")
 
     def write_report(self, sheet_changes=None, cell_changes=None, output=None):
-        return excel_report.write_report(
+        return excel_diff.write_report(
             sheet_changes or [], cell_changes or [], self.old, self.new,
             self.output if output is None else output,
         )
@@ -166,8 +166,8 @@ class ExcelReportTests(unittest.TestCase):
 
     def test_default_output_uses_descriptive_name_in_reports_directory(self):
         report_directory = self.directory / "default reports"
-        with patch.object(excel_report, "REPORTS_DIR", report_directory):
-            output = excel_report.write_report([], [], self.old, self.new)
+        with patch.object(excel_diff, "REPORTS_DIR", report_directory):
+            output = excel_diff.write_report([], [], self.old, self.new)
         self.assertEqual(output.parent, report_directory.resolve())
         self.assertRegex(output.name, r"^変更点まとめ_\d{8}_\d{6}_\d{6}\.xlsx$")
         self.assertTrue(output.is_file())
@@ -186,7 +186,7 @@ class ExcelReportTests(unittest.TestCase):
         self.output.parent.mkdir()
         original = b"do not overwrite this report"
         self.output.write_bytes(original)
-        with self.assertRaises(excel_report.ReportWriteError):
+        with self.assertRaises(excel_diff.ReportWriteError):
             self.write_report()
         self.assertEqual(self.output.read_bytes(), original)
         self.assertEqual(list(self.output.parent.iterdir()), [self.output])
@@ -195,20 +195,20 @@ class ExcelReportTests(unittest.TestCase):
         for input_path in (self.old, self.new):
             with self.subTest(input_path=input_path):
                 original = input_path.read_bytes()
-                with self.assertRaises(excel_report.ReportWriteError):
+                with self.assertRaises(excel_diff.ReportWriteError):
                     self.write_report(output=input_path)
                 self.assertEqual(input_path.read_bytes(), original)
 
     def test_non_xlsx_output_is_rejected(self):
         output = self.directory / "report.csv"
-        with self.assertRaises(excel_report.ReportWriteError):
+        with self.assertRaises(excel_diff.ReportWriteError):
             self.write_report(output=output)
         self.assertFalse(output.exists())
 
     def test_file_in_place_of_parent_directory_is_friendly_error(self):
         parent = self.directory / "not a directory"
         parent.write_bytes(b"keep this file")
-        with self.assertRaises(excel_report.ReportWriteError):
+        with self.assertRaises(excel_diff.ReportWriteError):
             self.write_report(output=parent / "report.xlsx")
         self.assertEqual(parent.read_bytes(), b"keep this file")
 
@@ -221,7 +221,7 @@ class ExcelReportTests(unittest.TestCase):
             raise OSError("テスト用の書き込み失敗")
 
         with patch.object(openpyxl.Workbook, "save", autospec=True, side_effect=fail_save):
-            with self.assertRaises(excel_report.ReportWriteError):
+            with self.assertRaises(excel_diff.ReportWriteError):
                 self.write_report()
         self.assertFalse(self.output.exists())
         if self.output.parent.exists():

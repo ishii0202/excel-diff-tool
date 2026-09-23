@@ -2,6 +2,8 @@
 
 2つのExcelファイルを比較して、セルの値・数式とシート構成の差分を日本語で表示し、変更点をExcelレポートにまとめるPython製のコマンドラインツールです。
 
+プログラム本体は `excel_diff.py` の1ファイルで、比較とレポート作成を行います。
+
 途中に行が追加・削除された場合も、前後で一致する行を手がかりに対応付けます。単純に同じセル番地だけを比較する方法より、後続行のずれによる差分を減らせます。
 
 ## できること
@@ -135,8 +137,7 @@ GitHub Actionsにもテストとサンプル実行を設定しています。Pyt
 
 ```text
 exceltool/
-├── excel_diff.py          # 比較処理とCLI
-├── excel_report.py        # Excelレポートの作成
+├── excel_diff.py          # 比較・Excelレポート・CLI
 ├── requirements.txt      # 依存ライブラリ
 ├── examples/
 │   ├── old.xlsx          # 架空データの旧版
