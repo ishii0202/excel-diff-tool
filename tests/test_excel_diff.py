@@ -166,6 +166,19 @@ class CommandLineTests(unittest.TestCase):
             capture_output=True, text=True, encoding="utf-8", check=False,
         )
 
+    def test_cli_outputs_japanese_with_non_utf8_default_encoding(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--output", str(self.report),
+             str(self.old), str(self.new)],
+            cwd=self.directory,
+            env={**os.environ, "PYTHONIOENCODING": "cp1252"},
+            capture_output=True, text=True, encoding="utf-8", check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("変更なし", result.stdout)
+        self.assertIn("レポート保存先:", result.stdout)
+        self.assertTrue(self.report.is_file())
+
     def test_help(self):
         result = self.run_cli("--help")
         self.assertEqual(result.returncode, 0)

@@ -684,7 +684,15 @@ def write_report(sheet_changes, cell_changes, old_file: Path, new_file: Path,
 # メイン処理
 # ============================================================
 
+def configure_output_encoding():
+    """日本語の結果を、OSの既定文字コードに左右されず出力する。"""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+
+
 def main(argv=None):
+    configure_output_encoding()
     parser = argparse.ArgumentParser(
         description="Excelファイルのシート構成とセルの値・数式を比較します。",
         epilog="引数を省略すると、同梱のexamples/old.xlsxとexamples/new.xlsxを比較します。",
