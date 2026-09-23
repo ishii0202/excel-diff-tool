@@ -176,7 +176,7 @@ class CommandLineTests(unittest.TestCase):
         result = self.run_cli(self.old, self.new)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.splitlines()[0], "変更なし")
-        self.assertIn(str(self.report), result.stdout)
+        self.assertIn(str(self.report.resolve()), result.stdout)
         self.assertTrue(self.report.is_file())
 
     def test_default_examples_from_different_working_directory(self):
@@ -191,7 +191,7 @@ class CommandLineTests(unittest.TestCase):
         result = self.run_cli(self.old, self.new, output=output)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(output.is_file())
-        self.assertIn(str(output), result.stdout)
+        self.assertIn(str(output.resolve()), result.stdout)
         self.assertEqual(self.old.read_bytes(), old_bytes)
         self.assertEqual(self.new.read_bytes(), new_bytes)
 
