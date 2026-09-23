@@ -151,14 +151,16 @@ class CommandLineTests(unittest.TestCase):
         self.directory = Path(self.temp.name)
         self.old = self.directory / "old book.xlsx"
         self.new = self.directory / "new book.xlsx"
+        self.report = self.directory / "変更点まとめ.xlsx"
         for path in (self.old, self.new):
             wb = make_workbook([("商品", "数量"), ("紅茶", 2)])
             wb.save(path)
             wb.close()
 
-    def run_cli(self, *args):
+    def run_cli(self, *args, output=None):
         return subprocess.run(
-            [sys.executable, str(SCRIPT), *map(str, args)],
+            [sys.executable, str(SCRIPT), "--output",
+             str(output if output is not None else self.report), *map(str, args)],
             cwd=self.directory,
             env={**os.environ, "PYTHONIOENCODING": "utf-8"},
             capture_output=True, text=True, encoding="utf-8", check=False,
@@ -168,16 +170,51 @@ class CommandLineTests(unittest.TestCase):
         result = self.run_cli("--help")
         self.assertEqual(result.returncode, 0)
         self.assertIn("old_file", result.stdout)
+        self.assertIn("--output", result.stdout)
 
     def test_paths_with_spaces_and_different_working_directory(self):
         result = self.run_cli(self.old, self.new)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.strip(), "変更なし")
+        self.assertEqual(result.stdout.splitlines()[0], "変更なし")
+        self.assertIn(str(self.report), result.stdout)
+        self.assertTrue(self.report.is_file())
 
     def test_default_examples_from_different_working_directory(self):
         result = self.run_cli()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("変更あり", result.stdout)
+
+    def test_custom_output_directory_and_input_files_stay_unchanged(self):
+        old_bytes = self.old.read_bytes()
+        new_bytes = self.new.read_bytes()
+        output = self.directory / "review files" / "比較結果.xlsx"
+        result = self.run_cli(self.old, self.new, output=output)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(output.is_file())
+        self.assertIn(str(output), result.stdout)
+        self.assertEqual(self.old.read_bytes(), old_bytes)
+        self.assertEqual(self.new.read_bytes(), new_bytes)
+
+    def test_existing_report_is_not_overwritten(self):
+        self.report.write_bytes(b"keep this report")
+        result = self.run_cli(self.old, self.new)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(self.report.read_bytes(), b"keep this report")
+        self.assertNotIn("レポート保存先:", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_output_cannot_replace_input(self):
+        original = self.old.read_bytes()
+        result = self.run_cli(self.old, self.new, output=self.old)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(self.old.read_bytes(), original)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_invalid_report_extension_is_friendly_error(self):
+        result = self.run_cli(self.old, self.new, output=self.directory / "report.csv")
+        self.assertEqual(result.returncode, 1)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse((self.directory / "report.csv").exists())
 
     def test_one_argument_is_usage_error(self):
         result = self.run_cli(self.old)

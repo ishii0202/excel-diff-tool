@@ -10,6 +10,8 @@ from zipfile import BadZipFile
 import openpyxl
 from openpyxl.utils.exceptions import InvalidFileException
 
+from excel_report import ReportWriteError, write_report
+
 
 EXAMPLES_DIR = Path(__file__).resolve().parent / "examples"
 
@@ -477,6 +479,10 @@ def main(argv=None):
     )
     parser.add_argument("old_file", nargs="?", type=Path, help="変更前のExcelファイル")
     parser.add_argument("new_file", nargs="?", type=Path, help="変更後のExcelファイル")
+    parser.add_argument(
+        "-o", "--output", type=Path, metavar="PATH",
+        help="Excelレポートの保存先（省略時: reports/変更点まとめ_日時.xlsx）",
+    )
     args = parser.parse_args(argv)
 
     if (args.old_file is None) != (args.new_file is None):
@@ -511,6 +517,16 @@ def main(argv=None):
 
         print_results(sheet_changes, cell_changes)
 
+    try:
+        report_path = write_report(
+            sheet_changes, cell_changes, old_file, new_file,
+            output_path=args.output,
+        )
+    except ReportWriteError as exc:
+        print(f"エラー: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"レポート保存先: {report_path}")
     return 0
 
 

@@ -27,6 +27,7 @@ Thumbs.db
 .local-backup/
 .local-artifacts/
 outputs/
+reports/
 
 # Only the two synthetic sample workbooks belong in Git
 *.[xX][lL][sS][xX]
